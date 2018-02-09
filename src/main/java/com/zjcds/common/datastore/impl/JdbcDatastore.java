@@ -1,52 +1,43 @@
 package com.zjcds.common.datastore.impl;
 
-import com.zjcds.common.datastore.enums.DsType;
-import com.zjcds.common.datastore.exception.ConnectionFailException;
+import com.zjcds.common.datastore.DatastoreMonitor;
 import com.zjcds.common.datastore.MetaDataNavigator;
 import com.zjcds.common.datastore.NativeSqlExecutor;
 import com.zjcds.common.datastore.UpdateableDatastore;
-import com.zjcds.common.datastore.UpdateableDatastoreConnection;
 import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.dbutils.DbUtils;
+import org.apache.metamodel.DataContext;
+import org.apache.metamodel.UpdateableDataContext;
+import org.apache.metamodel.jdbc.JdbcDataContext;
+import org.apache.metamodel.schema.TableType;
 import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * created date：2017-08-05
  * @author niezhegang
  */
 @Getter
-@Setter
-public class JdbcDatastore extends AbstractDataStore<UpdateableDatastoreConnection> implements UpdateableDatastore<UpdateableDatastoreConnection>,NativeSqlExecutor {
+public class JdbcDatastore extends AbstractDataStore implements UpdateableDatastore {
 
     private DataSource dataSource;
 
-    private JdbcDatastoreConnection jdbcDatastoreConnection ;
-
-    private DsType datastoreType;
+    private JdbcDataContext jdbcDataContext;
 
     private MetaDataNavigator metaDataNavigator;
 
-    private NativeSqlExecutor nativeSqlExecutorDelegator;
+    private NativeSqlExecutor nativeSqlExecutor;
+
+    private DatastoreMonitor datastoreMonitor;
 
     @Override
-    public UpdateableDatastoreConnection getDatastoreConnection() {
-        return jdbcDatastoreConnection;
+    public UpdateableDataContext getUpdateableDataContext() {
+        return jdbcDataContext;
     }
 
     @Override
-    public UpdateableDatastoreConnection getUpdateableDatastoreConnection() {
-        return jdbcDatastoreConnection;
-    }
-
-    @Override
-    public DsType getDatastoreType() {
-        return datastoreType;
+    public DataContext getDataContext() {
+        return jdbcDataContext;
     }
 
     @Override
@@ -54,34 +45,24 @@ public class JdbcDatastore extends AbstractDataStore<UpdateableDatastoreConnecti
         return metaDataNavigator;
     }
 
-    @Override
-    public int update(String sql) throws SQLException {
-        return nativeSqlExecutorDelegator.update(sql);
+    private void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    @Override
-    public int update(List<String> sqls) throws SQLException {
-        return nativeSqlExecutorDelegator.update(sqls);
+    private void setJdbcDataContext(JdbcDataContext jdbcDataContext) {
+        this.jdbcDataContext = jdbcDataContext;
     }
 
-    @Override
-    public int update(String sql, Object... params) throws SQLException {
-        return nativeSqlExecutorDelegator.update(sql,params);
+    private void setMetaDataNavigator(MetaDataNavigator metaDataNavigator) {
+        this.metaDataNavigator = metaDataNavigator;
     }
 
-    @Override
-    public void testConnection() throws ConnectionFailException {
-        Connection connection = null;
-        try {
-            Assert.notNull(dataSource,"传入的数据源参数不能为空！");
-            connection = dataSource.getConnection();
-        }
-        catch (SQLException e){
-            throw new ConnectionFailException("不能建立数据库连接",e);
-        }
-        finally {
-            DbUtils.closeQuietly(connection);
-        }
+    private void setNativeSqlExecutor(NativeSqlExecutor nativeSqlExecutor) {
+        this.nativeSqlExecutor = nativeSqlExecutor;
+    }
+
+    private void setDatastoreMonitor(DatastoreMonitor datastoreMonitor) {
+        this.datastoreMonitor = datastoreMonitor;
     }
 
     public static class Builder{
@@ -114,11 +95,16 @@ public class JdbcDatastore extends AbstractDataStore<UpdateableDatastoreConnecti
             Assert.hasText(name,"数据源名称不能为空！");
             jdbcDatastore.setName(name);
             jdbcDatastore.setDescription(description);
-            JdbcDatastoreConnection jdbcDatastoreConnection = new JdbcDatastoreConnection(dataSource,jdbcDatastore);
-            jdbcDatastore.setJdbcDatastoreConnection(jdbcDatastoreConnection);
-            jdbcDatastore.setDatastoreType(DsType.getDsType(jdbcDatastoreConnection.getProductName()));
-            jdbcDatastore.setMetaDataNavigator(new MetaDataNavigatorImpl(jdbcDatastoreConnection));
-            jdbcDatastore.setNativeSqlExecutorDelegator(new NativeSqlExecutorImpl(jdbcDatastore));
+            //配置jdbc数据上下文对象
+            JdbcDataContext jdbcDataContext = new JdbcDataContext(dataSource, TableType.DEFAULT_TABLE_TYPES, null);
+            jdbcDatastore.setJdbcDataContext(jdbcDataContext);
+            //配置元数据导航对象
+            jdbcDatastore.setMetaDataNavigator(new MetaDataNavigatorImpl(jdbcDataContext));
+            //配置原生sql执行对象
+            jdbcDatastore.setNativeSqlExecutor(new NativeSqlExecutorImpl(jdbcDatastore));
+            //配置数据监控对象
+            DatastoreMonitor datastoreMonitor = new DatastoreMonitorImpl(jdbcDatastore);
+            jdbcDatastore.setDatastoreMonitor(datastoreMonitor);
             return jdbcDatastore;
         }
     }

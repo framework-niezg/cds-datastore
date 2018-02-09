@@ -1,7 +1,6 @@
 package com.zjcds.common.datastore.impl;
 
 import com.zjcds.common.datastore.Datastore;
-import com.zjcds.common.datastore.DatastoreConnection;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-public abstract class AbstractDataStore<T extends DatastoreConnection> implements Datastore<T> {
+public abstract class AbstractDataStore implements Datastore {
 
     private String description;
 

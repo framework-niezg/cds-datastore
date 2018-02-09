@@ -1,9 +1,11 @@
 package com.zjcds.common.datastore;
 
 
-public interface UpdateableDatastore<T extends UpdateableDatastoreConnection> extends Datastore<T> {
+import org.apache.metamodel.UpdateableDataContext;
+
+public interface UpdateableDatastore extends Datastore {
 
 
-    T getUpdateableDatastoreConnection() ;
+    UpdateableDataContext getUpdateableDataContext();
 
 }
