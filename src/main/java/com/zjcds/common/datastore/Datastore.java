@@ -12,6 +12,5 @@ public interface Datastore extends Serializable {
 
     DataContext getDataContext();
 
-    MetaDataNavigator getMetaDataNavigator();
 
 }

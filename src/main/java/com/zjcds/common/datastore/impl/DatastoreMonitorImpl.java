@@ -5,6 +5,7 @@ import com.zjcds.common.datastore.exception.ConnectionFailException;
 import org.springframework.util.Assert;
 
 /**
+ * 对数据库状态进行监控
  * created date：2018-02-09
  * @author niezhegang
  */

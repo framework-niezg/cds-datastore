@@ -1,10 +1,6 @@
 package com.zjcds.common.datastore.impl;
 
-import com.zjcds.common.datastore.DatastoreMonitor;
-import com.zjcds.common.datastore.MetaDataNavigator;
-import com.zjcds.common.datastore.NativeSqlExecutor;
-import com.zjcds.common.datastore.UpdateableDatastore;
-import lombok.Getter;
+import com.zjcds.common.datastore.*;
 import org.apache.metamodel.DataContext;
 import org.apache.metamodel.UpdateableDataContext;
 import org.apache.metamodel.jdbc.JdbcDataContext;
@@ -17,7 +13,6 @@ import javax.sql.DataSource;
  * created date：2017-08-05
  * @author niezhegang
  */
-@Getter
 public class JdbcDatastore extends AbstractDataStore implements UpdateableDatastore {
 
     private DataSource dataSource;
@@ -25,6 +20,16 @@ public class JdbcDatastore extends AbstractDataStore implements UpdateableDatast
     private JdbcDataContext jdbcDataContext;
 
     private MetaDataNavigator metaDataNavigator;
+
+    private MetaSqlExecutor metaSqlExecutor;
+
+    public MetaSqlExecutor getMetaSqlExecutor() {
+        return metaSqlExecutor;
+    }
+
+    private void setMetaSqlExecutor(MetaSqlExecutor metaSqlExecutor) {
+        this.metaSqlExecutor = metaSqlExecutor;
+    }
 
     private NativeSqlExecutor nativeSqlExecutor;
 
@@ -40,9 +45,20 @@ public class JdbcDatastore extends AbstractDataStore implements UpdateableDatast
         return jdbcDataContext;
     }
 
-    @Override
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     public MetaDataNavigator getMetaDataNavigator() {
         return metaDataNavigator;
+    }
+
+    public NativeSqlExecutor getNativeSqlExecutor() {
+        return nativeSqlExecutor;
+    }
+
+    public DatastoreMonitor getDatastoreMonitor() {
+        return datastoreMonitor;
     }
 
     private void setDataSource(DataSource dataSource) {
@@ -100,6 +116,8 @@ public class JdbcDatastore extends AbstractDataStore implements UpdateableDatast
             jdbcDatastore.setJdbcDataContext(jdbcDataContext);
             //配置元数据导航对象
             jdbcDatastore.setMetaDataNavigator(new MetaDataNavigatorImpl(jdbcDataContext));
+            //配置元sql执行器
+            jdbcDatastore.setMetaSqlExecutor(new MetaSqlExecutorImpl(jdbcDataContext));
             //配置原生sql执行对象
             jdbcDatastore.setNativeSqlExecutor(new NativeSqlExecutorImpl(jdbcDatastore));
             //配置数据监控对象
