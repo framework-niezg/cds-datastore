@@ -6,14 +6,19 @@
 
     <groupId>com.zjcds.common</groupId>
     <artifactId>cds-datastore</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0</version>
 
     <parent>
         <groupId>com.zjcds.common</groupId>
         <artifactId>cds-common-parent</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>2.0</version>
     </parent>
 
+    <scm>
+        <connection>scm:git:http://115.236.161.138/base/cds_datastore.git</connection>
+        <developerConnection>scm:git:http://115.236.161.138/base/cds_datastore.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>com.zjcds.common</groupId>
